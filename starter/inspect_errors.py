@@ -24,7 +24,7 @@ import evaluation.possession_metrics as pm
 from games import GAME, GAMES, require
 
 PUBLIC_GT_PATH = os.path.join(ROOT, "evaluation", "gt", "BAR-ATH_possession_gt_public.csv")
-DEFAULT_PRED_PATH = os.path.join(ROOT, "evaluation", "results", "submission_v1.csv")
+DEFAULT_PRED_PATH = os.path.join(ROOT, "evaluation", "results", "submission_v3.csv")
 
 LABEL_NAMES = {pm.H: "H (Barcelona)", pm.A: "A (Athletic)", pm.D: "D (Dead Ball)", pm.X: "X"}
 
