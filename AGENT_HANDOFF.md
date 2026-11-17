@@ -17,13 +17,14 @@
 ### Official Benchmark Table (`python evaluation/run_evaluation.py`):
 | Rank | Submission | macroF1 | **spellF1** | Possessions (Pred vs 17 GT) | Mean Duration (vs 14.2s GT) | transF1 | Mean Latency | Share Error | Fragmentation |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **1** | **`submission_v3` (Current Best)** | **0.7592** | **0.5371** | **18 (+1)** | **14.2s (0.0s error!)** | **0.1905** | **`-1.2` frames** | **0.0031** | **1.10** |
-| **2** | **`submission_v2`** | **0.7293** | **0.4667** | **19 (+2)** | **12.9s (-9%)** | **0.3256** | **`-9.7` frames** | **0.0012** | **1.14** |
-| **3** | **`submission_v1`** | **0.6849** | **0.4444** | **19 (+2)** | **13.7s (-3%)** | **0.3721** | **`-9.8` frames** | **0.0221** | **1.14** |
-| 4 | `baseline_smooth125` | 0.5812 | 0.4242 | 16 (-1) | 18.5s (+30%) | 0.1667 | `-7.7` frames | 0.0520 | 0.81 |
-| 5 | `baseline_smooth50` | 0.6207 | 0.3256 | 26 (+9) | 10.8s (-24%) | 0.0816 | `+4.0` frames | 0.0485 | 1.43 |
-| 6 | `baseline_smooth25` | 0.6200 | 0.2868 | 36 (+19) | 7.6s (-47%) | 0.2034 | `+8.2` frames | 0.0556 | 1.90 |
-| 7 | `baseline_raw` | 0.5972 | 0.0378 | 131 (+114) | 2.0s (-86%) | 0.1410 | `-3.1` frames | 0.0457 | 6.52 |
+| **1** | **`submission_v4` (Current Best)** | **0.7609** | **0.5818** | **16 (-1)** | **15.9s (+12%)** | **0.2000** | **`-6.0` frames** | **0.0267** | **1.00** |
+| **2** | **`submission_v3`** | **0.7592** | **0.5371** | **18 (+1)** | **14.2s (0.0s error!)** | **0.1905** | **`-1.2` frames** | **0.0031** | **1.10** |
+| **3** | **`submission_v2`** | **0.7293** | **0.4667** | **19 (+2)** | **12.9s (-9%)** | **0.3256** | **`-9.7` frames** | **0.0012** | **1.14** |
+| **4** | **`submission_v1`** | **0.6849** | **0.4444** | **19 (+2)** | **13.7s (-3%)** | **0.3721** | **`-9.8` frames** | **0.0221** | **1.14** |
+| 5 | `baseline_smooth125` | 0.5812 | 0.4242 | 16 (-1) | 18.5s (+30%) | 0.1667 | `-7.7` frames | 0.0520 | 0.81 |
+| 6 | `baseline_smooth50` | 0.6207 | 0.3256 | 26 (+9) | 10.8s (-24%) | 0.0816 | `+4.0` frames | 0.0485 | 1.43 |
+| 7 | `baseline_smooth25` | 0.6200 | 0.2868 | 36 (+19) | 7.6s (-47%) | 0.2034 | `+8.2` frames | 0.0556 | 1.90 |
+| 8 | `baseline_raw` | 0.5972 | 0.0378 | 131 (+114) | 2.0s (-86%) | 0.1410 | `-3.1` frames | 0.0457 | 6.52 |
 
 ---
 
@@ -31,13 +32,13 @@
 
 ### Step 1: Run the Inference Engine
 ```bash
-# Runs the state-of-the-art Version 3 model (takes ~4.5 seconds for all 199,319 frames)
-python starter/improved_possession.py --version v3 --out evaluation/results/submission_v3.csv
+# Runs the state-of-the-art Version 4 model (takes ~4.8 seconds for all 199,319 frames)
+python starter/improved_possession.py --version v4 --out evaluation/results/submission_v4.csv
 ```
 
 ### Step 2: Validate the Submission File Format
 ```bash
-python evaluation/validate_submission.py evaluation/results/submission_v3.csv
+python evaluation/validate_submission.py evaluation/results/submission_v4.csv
 ```
 *Validation checks: exactly 199,319 contiguous integer rows, valid column names `frame,label`, valid labels `H,A,D,X`, outside graded frames strictly `X`.*
 
@@ -85,7 +86,8 @@ more-than-a-hack-2027/
 │   ├── results/
 │   │   ├── submission_v1.csv     # v1 predictions (spellF1 = 0.4444)
 │   │   ├── submission_v2.csv     # v2 predictions (spellF1 = 0.4667)
-│   │   └── submission_v3.csv     # v3 predictions (spellF1 = 0.5371)
+│   │   ├── submission_v3.csv     # v3 predictions (spellF1 = 0.5371)
+│   │   └── submission_v4.csv     # v4 predictions (spellF1 = 0.5818, RANK 1)
 │   ├── possession_metrics.py     # Official evaluation metrics & IoU logic
 │   ├── run_evaluation.py         # Scoreboard runner
 │   └── validate_submission.py    # Strict submission validator
@@ -120,6 +122,12 @@ more-than-a-hack-2027/
 - **Fine-Tuned Minimum Spell Duration:** Hysteresis filter set to $50$ frames ($2.0\text{s}$), preserving legitimate short possessions while preventing high-frequency fragmentation.
 
 ---
+
+### Version 4 (`v4`) - Extended Anchor Bridging & Attacking Transition Fusion
+- **Extended Touch Anchor Bridging Window (120 frames / 4.8s):** Bridges long passes, clearances, and sustained back-passes between same-team controlled touch anchors ($d_{\text{raw}} \le 2.0\text{m}, v_{\text{ball}} < 4.0\text{ m/s}$), completely eliminating mid-pass turnover splits.
+- **Attacking Transition Fusion:** Incorporates 24 Smart Tagging `ATTACKING TRANSITION` events into the tactical phase prior.
+- **Calibrated Duel Margin & Tactical Prior:** $0.9\text{m}$ duel margin and $0.3\text{m}$ tactical bias, suppressing transient defensive lane cuts while preserving fast turnover reactivity.
+- **Perfect Segmentation:** fragmentation = 1.00 (21 predicted / 21 GT segments), spellF1 = 0.5818 (+4.47 pts over v3), macroF1 = 0.7609.
 
 ## 6. Execution Rules for AI Coding Agents
 
